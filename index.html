@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Optimizer v30 Modular</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+
+<meta name="theme-color" content="#111214">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Panel Optimizer">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body class="phase1-basic">
+<div class="phase1-mode-float" aria-label="Kullanım modu hızlı geçiş">
+  <button type="button" class="phase1-mode-btn active" onclick="phase1SetMode('basic')" data-phase1-mode="basic">Basit Mod</button>
+  <button type="button" class="phase1-mode-btn" onclick="phase1SetMode('pro')" data-phase1-mode="pro">Pro Mod</button>
+</div>
+
+
+
+
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none">
+        <!-- Ana panel -->
+        <rect x="2" y="2" width="20" height="20" rx="2" fill="none" stroke="#fff" stroke-width="1.5" opacity=".9"/>
+        <!-- Dikey kesim çizgisi -->
+        <line x1="14" y1="2" x2="14" y2="22" stroke="#fff" stroke-width="1.5" opacity=".7" stroke-dasharray="0"/>
+        <!-- Yatay kesim çizgisi -->
+        <line x1="2" y1="10" x2="14" y2="10" stroke="#fff" stroke-width="1.5" opacity=".7"/>
+        <!-- Küçük parça vurgusu -->
+        <rect x="3" y="3" width="10" height="6" rx="1" fill="#fff" opacity=".25"/>
+        <rect x="15" y="3" width="6" height="18" rx="1" fill="#fff" opacity=".15"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-title">Panel <span>Optimizasyonu</span></div>
+      <div class="header-sub" id="subtitleTxt">Ana panel: 1830 × 3660 mm — MAXRECTS</div>
+    </div>
+  </div>
+  <div class="header-badges">
+    <span class="phase1-mode-toggle" aria-label="Kullanım modu">
+      <button type="button" class="phase1-mode-btn active" onclick="phase1SetMode('basic')" data-phase1-mode="basic">Basit</button>
+      <button type="button" class="phase1-mode-btn" onclick="phase1SetMode('pro')" data-phase1-mode="pro">Pro</button>
+    </span>
+    <span class="badge badge-version"><span class="badge-dot"></span>v22</span>
+    <span class="creator-sig" title="Tasarım: Mücahit Bilgin">
+      <span class="sig-label" data-i18n="designedBy">DESIGNED BY</span>
+      <span class="sig-name">MÜCAHİT BİLGİN</span>
+    </span>
+    <span class="badge badge-algo" id="algoLabel">MAXRECTS</span>
+    <span class="badge badge-clock" id="clockBadge" title="Anlık saat ve zaman dilimi">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span id="clockTime">--:--:--</span><span class="badge-clock-sep">·</span><span id="clockTZ">--</span>
+    </span>
+    <button class="btn-theme" onclick="showKbModal()" title="Klavye kısayolları (?)">⌨️</button>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="langBtnTR" onclick="setLang('tr')">TR</button>
+      <button class="lang-btn" id="langBtnEN" onclick="setLang('en')">EN</button>
+    </div>
+    <button class="btn-theme" id="themeToggleBtn" onclick="toggleTheme()" title="Tema değiştir">🌙 Dark</button>
+    <span class="last-save" id="lastSaveLbl"></span>
+  </div>
+</header>
+
+<div class="app">
+  <aside class="sidebar">
+
+    <!-- ANA PANEL -->
+    <div class="section open" id="sec-sheet">
+      <div class="section-header" onclick="toggleSection('sec-sheet')">
+        <div class="section-header-left"><div class="section-icon icon-gold">⬛</div><span class="section-title" data-i18n="panelSetup">Ana Panel</span></div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body"><div class="section-inner">
+        <div class="row2">
+          <div class="field"><label>Genişlik (mm)</label><input type="number" id="sheetW" value="1830" min="1" oninput="updateSubtitle()"></div>
+          <div class="field"><label>Yükseklik (mm)</label><input type="number" id="sheetH" value="3660" min="1" oninput="updateSubtitle()"></div>
+        </div>
+        <div class="presets phase1-pro-only">
+          <button class="btn btn-chip" onclick="setSheet(1830,3660)">1830×3660</button>
+          <button class="btn btn-chip" onclick="setSheet(2070,2800)">2070×2800</button>
+          <button class="btn btn-chip" onclick="setSheet(1220,2440)">1220×2440</button>
+          <button class="btn btn-chip" onclick="setSheet(2100,2800)">2100×2800</button>
+        </div>
+        <!-- Malzeme Türü + Kalınlık -->
+        <div class="row2" style="margin-bottom:8px">
+          <div class="field" style="margin-bottom:0">
+            <label data-i18n="material">Malzeme Türü</label>
+            <select id="materialType" onchange="setMaterial(this.value)">
+              <option value="">— Seçin —</option>
+              <option value="MDF">MDF</option>
+              <option value="Sunta">Sunta (Yonga Levha)</option>
+              <option value="Kontrplak">Kontrplak</option>
+              <option value="OSB">OSB</option>
+              <option value="Laminat MDF">Laminat MDF</option>
+              <option value="Cam">Cam</option>
+              <option value="Granit">Granit / Mermer</option>
+              <option value="Alüminyum">Alüminyum</option>
+              <option value="Ahşap">Masif Ahşap</option>
+              <option value="Diger">Diğer</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label data-i18n="thickness">Kalınlık (mm)</label>
+            <input type="number" id="sheetThickness" value="18" min="1" max="200" placeholder="18" oninput="setThickness(this.value)">
+          </div>
+        </div>
+        <button class="btn btn-rotate" onclick="rotateSheet()" style="width:100%;margin-bottom:10px" data-i18n="rotate">↻ &nbsp;Döndür (W ↔ H)</button>
+        <!-- Kenar + Kesim Payı -->
+        <label style="color:var(--muted2);font-size:.6rem;text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px;display:block">Kenar & Kesim Payları</label>
+        <div class="margin-row phase1-pro-only">
+          <div class="mini-field"><label data-i18n="edgeMargin">Kenar (mm)</label><input type="number" id="marginEdge" value="0" min="0" max="100" oninput="updateSubtitle()" style="width:100%"></div>
+          <div class="mini-field"><label data-i18n="cutMargin">Kesim (mm)</label><input type="number" id="marginCut" value="0" min="0" max="20" oninput="updateSubtitle()" style="width:100%"></div>
+        </div>
+        <!-- Panel Stok -->
+        <div class="field">
+          <label data-i18n="stockQty">📦 Eldeki Panel Adedi</label>
+          <input type="number" id="sheetStock" value="" min="0" placeholder="ör. 10">
+        </div>
+        <!-- Maliyet Girdileri -->
+        <label style="color:var(--muted2);font-size:.6rem;text-transform:uppercase;letter-spacing:.09em;margin-bottom:6px;display:block" data-i18n="costTitle">💰 Maliyet Girdileri</label>
+        <div class="grain-row phase1-pro-only" style="margin-bottom:8px">
+          <div class="grain-opt selected" onclick="setCurrency('TRY')" id="cur-TRY"><strong>₺</strong>TRY</div>
+          <div class="grain-opt" onclick="setCurrency('USD')" id="cur-USD"><strong>$</strong>USD</div>
+          <div class="grain-opt" onclick="setCurrency('EUR')" id="cur-EUR"><strong>€</strong>EUR</div>
+        </div>
+        <div class="field"><label><span data-i18n="sheetPriceLabel">Panel Fiyatı</span> (<span class="currency-symbol">₺</span>/panel) <span style="color:var(--muted);font-weight:400" data-i18n="sheetPriceNote">— toplam panel maliyeti</span></label><input type="number" id="sheetPrice" value="0" min="0" placeholder="0.00" step="0.01" oninput="_cachedPrices.valid=false;updateCost();renderParts();if(allPanelsResult.length)buildCutList(allPanelsResult)"></div>
+        <div class="field">
+          <label>Malzeme Birim Fiyatı (<span class="currency-symbol">₺</span>/m²) <span style="color:var(--muted);font-weight:400">— parça alanı üzerinden</span></label>
+          <div style="display:flex;gap:5px;align-items:center">
+            <input type="number" id="sqmPrice" value="0" min="0" placeholder="0.00" step="0.01" oninput="_cachedPrices.valid=false;updateCost();renderParts();if(allPanelsResult.length)buildCutList(allPanelsResult)" style="flex:1">
+            <button onclick="saveMaterialPrice()" style="background:none;border:1px solid var(--border2);color:var(--muted2);border-radius:5px;padding:6px 8px;font-size:.65rem;cursor:pointer;white-space:nowrap;transition:all .14s" title="Bu malzeme için fiyatı kaydet" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='';this.style.color=''"><span data-i18n="save">💾 Kaydet</span></button>
+          </div>
+        </div>
+        <!-- KDV -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;padding:8px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:8px">
+          <div class="toggle-row" style="margin:0;flex:1">
+            <input type="checkbox" id="kdvEnabled" onchange="_cachedPrices.valid=false;updateCost();renderParts();if(allPanelsResult.length)buildCutList(allPanelsResult)">
+            <label for="kdvEnabled" style="font-size:.72rem">KDV Ekle</label>
+          </div>
+          <select id="kdvRate" onchange="_cachedPrices.valid=false;updateCost();if(allPanelsResult.length)buildCutList(allPanelsResult)" style="width:80px;padding:4px 6px;font-size:.72rem">
+            <option value="1">%1</option>
+            <option value="8">%8</option>
+            <option value="10">%10</option>
+            <option value="18">%18</option>
+            <option value="20" selected>%20</option>
+          </select>
+        </div>
+        <div class="field"><label><span data-i18n="cutPriceLabel">Kesim Ücreti</span> (<span class="currency-symbol">₺</span>/adet) <span style="color:var(--muted);font-weight:400" data-i18n="cutPriceNote">— toplam kesim adedi × ücret</span></label><input type="number" id="cutPrice" value="0" min="0" placeholder="0.00" step="0.01" oninput="_cachedPrices.valid=false;updateCost();renderParts();if(allPanelsResult.length)buildCutList(allPanelsResult)"></div>
+      </div></div>
+    </div>
+
+    <!-- ALGORİTMA SEÇİMİ -->
+    <div class="section phase1-pro-only" id="sec-algo">
+      <div class="section-header" onclick="toggleSection('sec-algo')">
+        <div class="section-header-left"><div class="section-icon icon-cyan">⚙</div><span class="section-title" data-i18n="algorithm">Algoritma</span></div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body"><div class="section-inner">
+        <div class="algo-select-wrap">
+          <div class="algo-opt selected" onclick="setAlgo('hybrid')" id="algo-hybrid"><strong>HYBRID</strong>Kare + Max</div>
+          <div class="algo-opt" onclick="setAlgo('maxrects')" id="algo-maxrects"><strong>MAXRECTS</strong>En iyi doluluk</div>
+          <div class="algo-opt" onclick="setAlgo('shelf')" id="algo-shelf"><strong>Shelf</strong>Seri/kare</div>
+          <div class="algo-opt" onclick="setAlgo('ffd')" id="algo-ffd"><strong>FFD</strong>Hızlı</div>
+          <div class="algo-opt" onclick="setAlgo('guillotine')" id="algo-guillotine"><strong>Guillotine</strong>Tek kesim</div>
+        </div>
+        <div id="algoDesc" style="font-size:.67rem;color:var(--muted2);line-height:1.55;padding:4px 0">HYBRID: Kare/seri parçaları önce grid-shelf mantığıyla dizer, kalan boşlukları MaxRects ile doldurur. Önerilen varsayılan mod.</div>
+        <!-- Tahıl / Desen Yönü -->
+        <label style="color:var(--muted2);font-size:.6rem;text-transform:uppercase;letter-spacing:.09em;margin:8px 0 5px;display:block">
+          🪵 Tahıl Yönü (Desen / Yıllık Halka)
+          <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0"> — döndürme kısıtı</span>
+        </label>
+        <div class="grain-row">
+          <div class="grain-opt selected" onclick="setGrain('any')" id="grain-any"><strong>Serbest</strong>Her yön</div>
+          <div class="grain-opt" onclick="setGrain('horizontal')" id="grain-horizontal"><strong>→ Yatay</strong>W yönünde</div>
+          <div class="grain-opt" onclick="setGrain('vertical')" id="grain-vertical"><strong>↓ Dikey</strong>H yönünde</div>
+        </div>
+        <div id="grainDesc" style="font-size:.67rem;color:var(--muted2);line-height:1.55;padding:2px 0 4px">Serbest: Döndürmeye izin verilir. Tahıl yönü seçilirse parçalar döndürülmez.</div>
+        <!-- Simetrik mod -->
+        <div class="toggle-row" style="margin-top:6px">
+          <input type="checkbox" id="symmetricMode" onchange="save()">
+          <label for="symmetricMode">🪞 Simetrik Yerleşim <span style="color:var(--muted);font-size:.6rem">(çift adette paneli dengeli böl)</span></label>
+        </div>
+        <!-- Kesim Sırası -->
+        <label style="color:var(--muted2);font-size:.6rem;text-transform:uppercase;letter-spacing:.09em;margin:6px 0 5px;display:block">✂️ Kesim Listesi Sıralaması</label>
+        <div class="grain-row">
+          <div class="grain-opt selected" onclick="setCutOrder('placement')" id="cutorder-placement"><strong>Yerleşim</strong>Sırası</div>
+          <div class="grain-opt" onclick="setCutOrder('lr-tb')" id="cutorder-lr-tb"><strong>→↓ Sol→Sağ</strong>Üst→Alt</div>
+          <div class="grain-opt" onclick="setCutOrder('size')" id="cutorder-size"><strong>↕ Boyut</strong>Büyük→Küçük</div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- PARÇA EKLE -->
+    <div class="section open" id="sec-parts">
+      <div class="section-header" onclick="toggleSection('sec-parts')">
+        <div class="section-header-left"><div class="section-icon icon-cyan">＋</div><span class="section-title" data-i18n="partsSection">Parça Ekle</span></div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body"><div class="section-inner">
+        <div class="field"><label data-i18n="partName">Parça Adı</label><input type="text" id="partName" placeholder="ör. Raf A" maxlength="80"></div>
+        <div class="field"><label><span data-i18n="noteOpt">Not / Açıklama (opsiyonel)</span></label><input type="text" id="partNote" placeholder="ör. Sol kanat, cilalı yüzey" maxlength="120"></div>
+        <div class="row3">
+          <div class="field"><label>Etiket Kodu</label><input type="text" id="partLabelCode" placeholder="A1" maxlength="24"></div>
+          <div class="field"><label>Renk / Kod</label><input type="text" id="partMaterialCode" placeholder="Beyaz 110" maxlength="40"></div>
+          <div class="field"><label>Kenar Bant</label><input type="text" id="partEdgeBand" placeholder="Ön 1mm" maxlength="60"></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label data-i18n="width">Genişlik (mm)</label><input type="number" id="pw" placeholder="600" min="1"></div>
+          <div class="field"><label data-i18n="height">Yükseklik (mm)</label><input type="number" id="ph" placeholder="400" min="1"></div>
+        </div>
+        <!-- Hızlı boyut presetleri -->
+        <div id="partPresetsWrap">
+          <div class="presets" id="partPresets">
+            <button class="btn btn-chip" onclick="setPartSize(600,400)">600×400</button>
+            <button class="btn btn-chip" onclick="setPartSize(800,600)">800×600</button>
+            <button class="btn btn-chip" onclick="setPartSize(500,300)">500×300</button>
+            <button class="btn btn-chip" onclick="setPartSize(1200,600)">1200×600</button>
+            <button class="btn btn-chip" onclick="setPartSize(400,400)">400×400</button>
+          </div>
+          <button class="btn btn-chip" onclick="savePartPreset()" title="Mevcut genişlik+yüksekliği preset olarak kaydet" style="border-style:dashed;color:var(--gold);border-color:color-mix(in srgb,var(--gold) 40%,transparent)">＋ Kaydet</button>
+        </div>
+        <div class="row2">
+          <div class="field"><label data-i18n="qty">Adet</label><input type="number" id="pq" placeholder="1" min="1" value="1"></div>
+        </div>
+        <div class="toggle-row"><input type="checkbox" id="allowRotate" checked><label for="allowRotate"><span data-i18n="rotAllowed">Döndürmeye izin ver (90°)</span></label></div>
+        <button class="btn btn-primary" onclick="addPart()"><span data-i18n="addPart">＋ &nbsp;Parça Ekle</span></button>
+        <!-- CSV Import -->
+        <div class="csv-drop" id="csvDrop" title="CSV: ad,genislik,yukseklik,adet,fiyat">
+          <input type="file" accept=".csv,.txt" onchange="importCSV(this)">
+          <div class="csv-drop-icon">📄</div>
+          <div>CSV / TXT İçe Aktar</div>
+          <div style="font-size:.59rem;color:var(--muted);margin-top:2px">ad,gen,yük,adet,not,etiket,renk/kod,kenar bant</div>
+        </div>
+        <div id="msgBox" class="msg" style="margin-top:7px"></div>
+        <div class="bulk-toolbar" id="bulkToolbar">
+          <input type="checkbox" id="selectAllParts" class="part-checkbox" onchange="toggleSelectAll(this.checked)" title="Tümünü seç/kaldır">
+          <span class="bulk-count" id="bulkCount">0 seçili</span>
+          <button class="btn-bulk" onclick="bulkDuplicate()"><span data-i18n="duplicate">⧉ Çoğalt</span></button>
+          <button class="btn-bulk" onclick="bulkMoveUp()"><span data-i18n="sortUp">▲ Yukarı</span></button>
+          <button class="btn-bulk" onclick="bulkMoveDown()"><span data-i18n="sortDown">▼ Aşağı</span></button>
+          <button class="btn-bulk danger" onclick="bulkDelete()"><span data-i18n="del">✕ Sil</span></button>
+          <button class="btn-bulk" onclick="clearBulkSelection()" style="margin-left:auto"><span data-i18n="clearSel">✕ Seçimi Kaldır</span></button>
+        </div>
+        <div class="parts-search" id="partsSearchWrap" style="display:none">
+          <span class="parts-search-icon">🔍</span>
+          <input type="text" id="partsSearch" placeholder="Parça ara..." oninput="filterParts(this.value)">
+          <button class="parts-search-clear" id="partsSearchClear" onclick="clearPartsSearch()">✕</button>
+        </div>
+        <div class="parts-list" id="partsList">
+          <div class="parts-empty">
+  <div class="parts-empty-icon">📐</div>
+  <div><strong style="color:var(--text2)" data-i18n="emptyParts">Henüz parça eklenmedi</strong><br><span data-i18n="emptyPartsHint">Boyutları girin ve ekleyin,
+ya da CSV dosyası yükleyin.</span></div>
+  <span class="parts-empty-cta" data-i18n="emptyPartsAdd" onclick="document.getElementById('partName').focus()">＋ İlk parçayı ekle</span>
+</div>
+        </div>
+        <div style="display:flex;gap:5px;margin-top:5px;margin-bottom:0">
+          <button class="btn btn-secondary" onclick="mergeSameParts()" style="font-size:.65rem;padding:5px 8px;margin-bottom:0;flex:1" title="Aynı boyuttaki parçaları birleştir"><span data-i18n="mergeBtn">⊕ Aynıları Birleştir</span></button>
+          <button class="btn btn-secondary" onclick="sortPartsBySize()" style="font-size:.65rem;padding:5px 8px;margin-bottom:0;flex:1" title="Parçaları büyükten küçüğe sırala"><span data-i18n="sortSize">↕ Boyuta Göre Sırala</span></button>
+        </div>
+        <div class="max-summary" id="maxSummary">
+          <div class="max-summary-title">📐 Maks. Çıkacak Adet (tek tür)</div>
+          <div id="maxSummaryRows"></div>
+          <div class="max-summary-total"><span>Toplam kapasite</span><span id="maxSummaryTotal" style="color:var(--green);font-weight:700;font-family:var(--mono)"></span></div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- HIZLI HESAP -->
+    <div class="section secondary phase1-pro-only" id="sec-quick">
+      <div class="section-header" onclick="toggleSection('sec-quick')">
+        <div class="section-header-left"><div class="section-icon icon-cyan">⚡</div><span class="section-title" data-i18n="quickCalc">Hızlı Hesap</span></div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body"><div class="section-inner">
+        <div class="phase1-ios-note phase1-basic-only">Basit Mod: panel ölçüsü gir, parçaları ekle, Akıllı Optimize ile sonucu al. iPhone'da en stabil kullanım için Safari'de localhost üzerinden aç.</div>
+        <div class="phase1-quick-add phase1-basic-only" id="phase1QuickAddBox">
+          <div class="phase1-quick-title">Hızlı Parça Girişi <span class="phase1-quick-hint">450x720x2 Kapak Beyaz</span></div>
+          <textarea id="phase1QuickText" placeholder="450x720x2 Kapak Beyaz&#10;320x560x4 Raf&#10;600x800x1 Yan Panel"></textarea>
+          <div class="phase1-quick-actions">
+            <button type="button" class="phase1-quick-primary" onclick="phase1QuickAdd()">Parçaları Ekle</button>
+            <button type="button" class="phase1-quick-secondary" onclick="phase1Sample()">Örnek Doldur</button>
+          </div>
+          <div class="phase1-status" id="phase1QuickStatus"></div>
+        </div>
+
+        <div class="tab-row">
+          <button class="tab-btn active" id="tab-single" onclick="switchQuickTab('single')">Tek Boyut</button>
+          <button class="tab-btn" id="tab-all" onclick="switchQuickTab('all')">Tüm Parçalar</button>
+        </div>
+        <div id="quickSingleMode">
+          <div class="row2">
+            <div class="field"><label data-i18n="width">Genişlik (mm)</label><input type="number" id="qpw" placeholder="600" min="1" oninput="calcQuickSingle()"></div>
+            <div class="field"><label data-i18n="height">Yükseklik (mm)</label><input type="number" id="qph" placeholder="400" min="1" oninput="calcQuickSingle()"></div>
+          </div>
+          <div class="toggle-row"><input type="checkbox" id="qAllowRotate" checked onchange="calcQuickSingle()"><label for="qAllowRotate"><span data-i18n="rotAllowed">Döndürmeye izin ver (90°)</span></label></div>
+          <div class="quick-result" id="quickSingleResult">
+            <div class="quick-result-row"><span class="qr-label" data-i18n="normalDim">Normal (W×H)</span><span class="qr-val" id="qr-normal">—</span></div>
+            <div class="quick-result-row"><span class="qr-label" data-i18n="rotDim">Döndürülmüş (H×W)</span><span class="qr-val" id="qr-rotated">—</span></div>
+            <div class="quick-result-row"><span class="qr-label" style="font-weight:700;color:var(--text)" data-i18n="maxQty">📐 Maks. Çıkacak Adet (tek tür)</span><span class="qr-val good" id="qr-max">—</span></div>
+            <div class="quick-result-row"><span class="qr-label" data-i18n="areaUsage">Alan Kullanımı</span><span class="qr-val" id="qr-usage">—</span></div>
+          </div>
+        </div>
+        <div id="quickAllMode" style="display:none">
+          <div style="color:var(--muted2);font-size:.71rem;margin-bottom:9px;line-height:1.55">Tüm parçalar için teorik maks. adet hesaplanır.</div>
+          <button class="btn btn-primary" onclick="calcQuickAll()" style="margin-bottom:0"><span data-i18n="calculate">▶ &nbsp;Hesapla</span></button>
+          <div class="quick-result" id="quickAllResult"></div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- HESAPLA & İSTATİSTİK -->
+    <div class="section" id="sec-calc">
+      <div class="section-header" onclick="toggleSection('sec-calc')">
+        <div class="section-header-left"><div class="section-icon icon-gold">▶</div><span class="section-title" data-i18n="resultsSection">Yerleştir & İstatistik</span></div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body"><div class="section-inner">
+        <div class="stats-grid">
+          <div class="stat-box" style="--stat-color:var(--accent)"><div class="stat-val" id="s-total">—</div><div class="stat-label" data-i18n="totalParts">Toplam Parça</div></div>
+          <div class="stat-box" style="--stat-color:var(--emerald)"><div class="stat-val" id="s-placed">—</div><div class="stat-label" data-i18n="placed">Yerleştirilen</div></div>
+          <div class="stat-box" style="--stat-color:var(--success)"><div class="stat-val" id="s-usage">—</div><div class="stat-label" data-i18n="areaUsage">Alan Kullanımı</div></div>
+          <div class="stat-box" style="--stat-color:var(--danger)"><div class="stat-val" id="s-waste">—</div><div class="stat-label" data-i18n="waste">Fire</div></div>
+          <div class="stat-box stat-box-wide" style="--stat-color:var(--info)">
+            <div class="stat-label" style="margin:0" data-i18n="panels">Panel Sayısı</div>
+            <div class="stat-val" id="s-panels" style="font-size:.88rem">—</div>
+          </div>
+          <div class="stat-box stat-box-wide" style="--stat-color:var(--danger)">
+            <div class="stat-label" style="margin:0" data-i18n="waste">Fire Alanı</div>
+            <div class="stat-val" id="s-waste-area" style="font-size:.88rem">—</div>
+          </div>
+        </div>
+
+        <!-- Verim Çubuğu -->
+        <div class="efficiency-bar-wrap" id="efficiencyBarWrap">
+          <div class="efficiency-bar-label">
+            <span id="effBarLabel">Alan verimi</span>
+            <strong id="effBarPct" class="good">—</strong>
+          </div>
+          <div class="efficiency-bar-track">
+            <div class="efficiency-bar-fill" id="effBarFill" style="width:0%"></div>
+          </div>
+        </div>
+
+        <!-- Algoritma Karşılaştırma -->
+        <div class="algo-compare-wrap" id="algoCompareWrap">
+          <div class="algo-compare-title">Algoritma Karşılaştırması</div>
+          <div class="algo-compare-grid" id="algoCompareGrid"></div>
+        </div>
+
+        <button class="btn btn-cta" id="calcBtn" onclick="calculate()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polygon points="5,3 19,12 5,21" fill="currentColor"/></svg>
+          <span data-i18n="calculate">▶ Hesapla & Yerleştir</span>
+        </button>
+        <!-- Maliyet -->
+        <div class="cost-result" id="costResult">
+          <div style="font-family:var(--mono);font-size:.59rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.09em;margin-bottom:7px">💰 Maliyet Hesabı</div>
+          <div class="cost-row"><span class="cost-label">Panel Malzemesi</span><span class="cost-val" id="cr-panel-cost">—</span></div>
+          <div class="cost-row"><span class="cost-label">Parça Malzemesi (m²)</span><span class="cost-val" id="cr-part-cost">—</span></div>
+          <div class="cost-row" id="cr-parts-breakdown-row" style="display:none;flex-direction:column;padding:4px 0 2px">
+            <div id="cr-parts-breakdown" style="width:100%"></div>
+          </div>
+          <div class="cost-row"><span class="cost-label">İşçilik / Kesim</span><span class="cost-val" id="cr-cut-cost">—</span></div>
+          <div class="cost-row" style="border-top:1px dashed rgba(244,63,94,.25);margin-top:3px;padding-top:5px">
+            <span class="cost-label" style="color:var(--red);font-size:.67rem">🔥 Fire Maliyeti <span style="font-size:.58rem;opacity:.7">(bilgi)</span></span>
+            <span class="cost-val" id="cr-waste-cost" style="color:var(--red);font-size:.75rem">—</span>
+          </div>
+          <div class="cost-row" id="cr-kdv-row" style="display:none">
+            <span class="cost-label" style="color:var(--muted2)">KDV (<span id="cr-kdv-rate-lbl">20</span>%)</span>
+            <span class="cost-val" id="cr-kdv" style="color:var(--orange)">—</span>
+          </div>
+          <div class="cost-row cost-total"><span class="cost-label">Genel Toplam</span><span class="cost-val" id="cr-total">—</span></div>
+          <div class="cost-row" id="cr-total-kdv-row" style="display:none">
+            <span class="cost-label" style="font-weight:700;color:var(--text)">KDV Dahil Toplam</span>
+            <span class="cost-val" id="cr-total-kdv" style="color:var(--green);font-size:1rem">—</span>
+          </div>
+          <button onclick="toggleCostBreakdown()" id="cr-toggle-btn" style="background:none;border:none;color:var(--muted2);font-size:.62rem;font-family:var(--mono);cursor:pointer;padding:2px 0;text-align:left;width:100%;margin-top:2px">▶ Parça detayı göster</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:7px">
+          <button class="btn btn-danger" onclick="clearAll()" style="margin-bottom:0;font-size:.7rem">✕ Temizle</button>
+          <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+            <button class="btn btn-secondary" id="undoBtn2" onclick="undoLast()" style="margin-bottom:0;font-size:.7rem" title="Geri Al (Ctrl+Z)"><span data-i18n="undo">↩ Geri Al</span></button>
+            <div id="undoActionLbl" style="font-family:var(--mono);font-size:.56rem;color:var(--muted);padding:0 2px;height:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px;flex:1">
+            <button class="btn btn-secondary" id="redoBtn2" onclick="redoLast()" style="margin-bottom:0;font-size:.7rem;opacity:.35" disabled title="İleri Al (Ctrl+Y)"><span data-i18n="redo">↪ İleri Al</span></button>
+            <div id="redoActionLbl" style="font-family:var(--mono);font-size:.56rem;color:var(--muted);padding:0 2px;height:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+          </div>
+        </div>
+        <div id="unfitList" class="unfit-list"></div>
+        <div id="stockAlert" style="display:none;margin-top:7px;padding:8px 10px;background:var(--orange-dim);border:1px solid rgba(251,140,60,.3);border-radius:var(--radius-sm);font-size:.71rem;color:var(--orange)"></div>
+      </div></div>
+    </div>
+
+    <!-- PROJE YÖNETİMİ -->
+    <div class="section secondary phase1-pro-only" id="sec-project">
+      <div class="section-header" onclick="toggleSection('sec-project')">
+        <div class="section-header-left"><div class="section-icon icon-purple">📁</div><span class="section-title" data-i18n="projectsSection">Projeler</span></div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body"><div class="section-inner">
+        <div class="field"><label data-i18n="customer">Müşteri / Firma Adı</label><input type="text" id="customerName" placeholder="ör. Ahmet Bey / ABC Mobilya"></div>
+        <div class="field"><label><span data-i18n="orderNo">Sipariş / Teklif No (opsiyonel)</span></label><input type="text" id="orderNo" placeholder="ör. TKL-2025-001"></div>
+        <div class="row2">
+          <div class="field"><label>Teslim Tarihi</label><input type="text" id="projectDelivery" placeholder="ör. 15.06.2026"></div>
+          <div class="field"><label>Operatör / Hazırlayan</label><input type="text" id="operatorName" placeholder="ör. Usta / Operatör"></div>
+        </div>
+        <div class="field"><label>Proje Notu</label><input type="text" id="projectNote" placeholder="ör. Acil iş, cilalı yüzeyler kontrol edilecek" maxlength="160"></div>
+        <div class="field"><label>Atölye Notu</label><input type="text" id="workshopNote" placeholder="ör. Önce kapaklar, sonra raflar kesilecek" maxlength="160"></div>
+        <div class="field"><label data-i18n="projectName">Proje Adı</label><input type="text" id="projectName" placeholder="ör. Mutfak Dolabı - Salon"></div>
+        <div class="row2" style="margin-bottom:8px">
+          <button class="btn btn-primary" onclick="saveProject()" style="margin-bottom:0;font-size:.7rem">💾 Kaydet</button>
+          <button class="btn btn-secondary" onclick="exportProject()" style="margin-bottom:0;font-size:.7rem"><span data-i18n="exportJSON">📤 JSON</span></button>
+        </div>
+        <button class="btn btn-green" onclick="exportQuotePDF()" style="margin-bottom:8px;font-size:.75rem"><span data-i18n="quotePDF">📋 &nbsp;Teklif PDF Oluştur</span></button>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin-bottom:8px">
+          <input type="file" accept=".json" onchange="importProject(this)" style="display:none" id="importProjectInput">
+          <button class="btn btn-secondary" onclick="document.getElementById('importProjectInput').click()" style="margin-bottom:0;font-size:.7rem;width:100%"><span data-i18n="loadJSON">📥 JSON Yükle</span></button>
+        </label>
+        <div class="project-list" id="projectList"></div>
+        <!-- JSON Drag-Drop -->
+        <div id="projectDropZone" style="margin-top:8px;border:1.5px dashed var(--border2);border-radius:8px;padding:10px;text-align:center;font-size:.65rem;color:var(--muted2);transition:all .2s;cursor:pointer" onclick="document.getElementById('importProjectInput').click()">
+          📂 JSON proje dosyasını buraya sürükleyin veya tıklayın
+        </div>
+        <div id="storageInfo" style="margin-top:8px;font-family:var(--mono);font-size:.58rem;color:var(--muted);display:flex;justify-content:space-between;align-items:center;padding:4px 2px"></div>
+      </div></div>
+    </div>
+
+    <!-- GEÇMİŞ -->
+    <div class="section secondary phase1-pro-only" id="sec-history">
+      <div class="section-header" onclick="toggleSection('sec-history')">
+        <div class="section-header-left"><div class="section-icon icon-orange">📊</div><span class="section-title" data-i18n="history">Hesap Geçmişi</span></div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body"><div class="section-inner">
+        <div class="history-list" id="historyList"><div class="project-empty" data-i18n="emptyHistory">Henüz hesap yapılmadı.</div></div>
+        <button class="btn btn-danger" onclick="clearHistory()" style="margin-top:8px;font-size:.65rem">Geçmişi Temizle</button>
+      </div></div>
+    </div>
+
+    <!-- OTOMATİK YEDEKLER -->
+    <div class="section phase1-pro-only" id="sec-backup">
+      <div class="section-header" onclick="toggleSection('sec-backup')">
+        <div class="section-header-left"><div class="section-icon icon-green">💾</div><span class="section-title" data-i18n="backups">Otomatik Yedekler</span></div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body"><div class="section-inner">
+        <div style="font-size:.7rem;color:var(--muted2);margin-bottom:8px;line-height:1.55">Her hesap sonrası son 5 durum otomatik yedeklenir. Tıklayarak geri yükleyin.</div>
+        <div class="project-list" id="backupList"><div class="project-empty" data-i18n="emptyBackups">Henüz yedek yok.</div></div>
+      </div></div>
+    </div>
+
+    <!-- PAYLAŞ -->
+    <div class="section phase1-pro-only" id="sec-share">
+      <div class="section-header" onclick="toggleSection('sec-share')">
+        <div class="section-header-left"><div class="section-icon icon-green">🔗</div><span class="section-title" data-i18n="share">Paylaş</span></div>
+        <span class="section-chevron">▼</span>
+      </div>
+      <div class="section-body"><div class="section-inner">
+        <div style="font-size:.7rem;color:var(--muted2);margin-bottom:8px;line-height:1.55">Projeyi URL'e kodla ve paylaş. Link açıldığında aynı proje yüklenir.</div>
+        <button class="btn btn-green" onclick="generateShareURL()" style="margin-bottom:0"><span data-i18n="shareLink">🔗 &nbsp;Paylaşım Linki Oluştur</span></button>
+        <div class="share-url-box" id="shareUrlBox" style="display:none">
+          <input type="text" id="shareUrlInput" readonly style="font-size:.65rem">
+          <button class="btn-copy" onclick="copyShareURL()">Kopyala</button>
+        </div>
+      </div></div>
+    </div>
+
+  </aside>
+
+  <main class="main">
+    <div class="canvas-header">
+      <div class="canvas-header-top">
+        <div style="min-width:0;flex:1">
+          <div class="canvas-title" data-i18n="canvasTitle">Yerleşim Planı</div>
+          <div class="canvas-subtitle" id="canvasInfo" data-i18n="canvasEmpty">Henüz hesap yapılmadı</div>
+        </div>
+        <button class="stale-banner" id="staleBanner" onclick="calculate()">
+          ⚠️ <strong>Yeniden Hesapla</strong>
+        </button>
+        <button class="btn-fullscreen" id="fsBtn" onclick="toggleFullscreen()" title="Tam ekran (F)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M3 3h6M3 3v6M21 3h-6M21 3v6M3 21h6M3 21v-6M21 21h-6M21 21v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="canvas-header-controls">
+        <div class="panel-nav" id="panelNav" style="display:none"></div>
+        <div class="zoom-controls">
+          <button class="zoom-btn" onclick="zoomOut()" title="Uzaklaştır (Ctrl+−)">−</button>
+          <span class="zoom-level" id="zoomLevelLbl">100%</span>
+          <button class="zoom-btn" onclick="zoomIn()" title="Yaklaştır (Ctrl++)">+</button>
+          <button class="zoom-btn" onclick="zoomReset()" title="Sıfırla (Ctrl+0)" style="font-size:.56rem;width:34px;color:var(--muted2)">FIT</button>
+        </div>
+        <div class="ctrl-group">
+          <button class="btn-export" id="svgBtn" onclick="exportSVG()" disabled title="SVG — vektörel, tüm paneller"><span data-i18n="exportSVG">SVG</span></button>
+          <button class="btn-export" id="pdfBtn" onclick="downloadPDF()" disabled title="PDF — tüm paneller"><span data-i18n="exportPDF">PDF</span></button>
+        </div>
+        <div class="ctrl-group">
+          <button class="btn-export" id="pngBtn" onclick="downloadPNG()" disabled title="PNG — bu panel"><span data-i18n="exportPNG">PNG</span></button>
+          <button class="btn-export" id="pngAllBtn" onclick="downloadAllPNG()" disabled style="display:none" title="PNG — tüm paneller ayrı ayrı">PNG×Tüm</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="canvas-scroll" id="canvasScroll">
+        <div class="canvas-inner" id="canvasInner">
+          <canvas id="mainCanvas" style="display:none"></canvas>
+        </div>
+      </div>
+      <div class="canvas-placeholder" id="placeholder">
+        <svg class="ph-svg" width="100" height="85" viewBox="0 0 120 100" fill="none">
+          <rect x="4" y="4" width="112" height="92" rx="4" stroke="#2d4a70" stroke-width="1.5" stroke-dasharray="6 3"/>
+          <rect x="14" y="14" width="36" height="28" rx="3" fill="#111c2e" stroke="#1e304a" stroke-width="1.5"/>
+          <rect x="58" y="14" width="48" height="16" rx="3" fill="#111c2e" stroke="#1e304a" stroke-width="1.5"/>
+          <rect x="58" y="38" width="48" height="40" rx="3" fill="#111c2e" stroke="#1e304a" stroke-width="1.5"/>
+          <rect x="14" y="50" width="36" height="36" rx="3" fill="#111c2e" stroke="#1e304a" stroke-width="1.5"/>
+        </svg>
+        <div class="ph-text">Parça ekleyin ve<br><strong style="color:var(--gold)">Hesapla</strong> butonuna tıklayın</div>
+        <div class="ph-hint">Scroll: zoom · Sürükle: kaydır · Ctrl+Z: geri al</div>
+        <div style="position:absolute;bottom:14px;right:16px;font-family:var(--mono);font-size:.52rem;color:rgba(129,140,248,.25);letter-spacing:.12em;text-align:right;line-height:1.6;pointer-events:none;user-select:none">
+          PANEL OPTİMİZASYONU<br>
+          <span style="color:rgba(139,92,246,.35)">✦ MÜCAHİT BİLGİN ✦</span>
+        </div>
+      </div>
+      <div class="zoom-hint" id="zoomHint">Scroll: zoom · Sürükle: kaydır · Ctrl+0: sıfırla</div>
+      <button class="kb-hint-btn" onclick="showKbModal()" title="Klavye kısayolları">⌨ <kbd>?</kbd></button>
+    </div>
+
+    <div class="scale-bar-wrap" id="scaleBarWrap">
+      <canvas id="scaleBar"></canvas>
+    </div>
+
+    <div class="legend" id="legend">
+      <span style="color:var(--muted);font-size:.62rem;font-family:var(--mono)" data-i18n="legendHint">Hesap sonrası lejant burada görünür</span>
+    </div>
+
+    <!-- KESİM LİSTESİ -->
+    <div id="cutListWrap" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-family:var(--display);font-size:.85rem;font-weight:800;color:var(--text2)">✂️ Kesim Listesi</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:5px;cursor:pointer;margin:0;text-transform:none;font-family:var(--sans);font-size:.67rem;color:var(--muted2);font-weight:500;letter-spacing:0">
+            <input type="checkbox" id="cutGroupByPanel" onchange="if(allPanelsResult.length)buildCutList(allPanelsResult)" style="width:12px;height:12px;margin:0">
+            Panel bazlı grupla
+          </label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn-export" onclick="exportCutListCSV()"><span data-i18n="exportCSV">📄 CSV</span></button>
+            <button class="btn-export" onclick="exportCutListXLSX()" title="Kesim listesi Excel"><span data-i18n="exportExcel">📊 Excel</span></button>
+            <button class="btn-export" onclick="exportXLSX()" title="Tam rapor: Kesim + Özet + Maliyet (3 sayfa)"><span data-i18n="exportFullXLSX">📊 Tam XLSX</span></button>
+            <button class="btn-export" onclick="exportCutListDXF()" title="Kesim makinesine göndermek için DXF"><span data-i18n="exportDXF">📐 DXF</span></button>
+          </div>
+        </div>
+      </div>
+      <div class="cut-list">
+        <div class="cut-list-head" id="cutListHead">
+          <span>#</span><span>Parça</span><span>Boyut</span><span>Konum (X,Y)</span><span>Panel</span><span style="text-align:right" id="cutListCostHeader">Maliyet</span>
+        </div>
+        <div class="cut-list-wrap" id="cutListBody"></div>
+      </div>
+      <button class="cut-list-expand" id="cutListExpandBtn" onclick="toggleCutListExpand()" style="display:none">▼ Tümünü Göster</button>
+    </div>
+  </main>
+</div>
+
+<!-- COLOR PICKER POPUP -->
+<div class="color-picker-popup" id="colorPickerPopup">
+  <div class="color-picker-title">Parça Rengi</div>
+  <div class="color-picker-grid" id="colorPickerGrid"></div>
+  <div class="color-picker-custom">
+    <input type="color" id="colorPickerCustom" value="#f0c040" oninput="applyCustomColor(this.value)">
+    <label>Özel renk</label>
+  </div>
+</div>
+
+<!-- CANVAS TOOLTIP -->
+<div class="canvas-tooltip" id="canvasTooltip">
+  <div class="ct-name" id="ct-name"></div>
+  <div class="ct-dim" id="ct-dim"></div>
+  <div class="ct-pos" id="ct-pos"></div>
+  <div class="ct-cost" id="ct-cost" style="display:none"></div>
+</div>
+
+<!-- KEYBOARD MODAL -->
+<div class="kb-modal-overlay" id="kbModal" onclick="if(event.target===this)hideKbModal()">
+  <div class="kb-modal">
+    <div class="kb-modal-title">
+      <span data-i18n="kbTitle">⌨️ Klavye Kısayolları</span>
+      <button class="kb-close" onclick="hideKbModal()">✕</button>
+    </div>
+    <div class="kb-group">
+      <div class="kb-group-label">Genel</div>
+      <div class="kb-row"><span class="kb-desc" data-i18n="calculate">▶ &nbsp;Hesapla & Yerleştir</span><div class="kb-keys"><span class="kb-key">Ctrl</span><span class="kb-key">Enter</span></div></div>
+      <div class="kb-row"><span class="kb-desc">Geri al</span><div class="kb-keys"><span class="kb-key">Ctrl</span><span class="kb-key">Z</span></div></div>
+      <div class="kb-row"><span class="kb-desc">İleri al (Redo)</span><div class="kb-keys"><span class="kb-key">Ctrl</span><span class="kb-key">Y</span></div></div>
+      <div class="kb-row"><span class="kb-desc">Projeyi kaydet</span><div class="kb-keys"><span class="kb-key">Ctrl</span><span class="kb-key">S</span></div></div>
+      <div class="kb-row"><span class="kb-desc">Parçayı kopyala</span><div class="kb-keys"><span class="kb-key">Ctrl</span><span class="kb-key">D</span></div></div>
+      <div class="kb-row"><span class="kb-desc">Tam ekran aç/kapat</span><div class="kb-keys"><span class="kb-key">F</span></div></div>
+      <div class="kb-row"><span class="kb-desc">Bu yardımı aç/kapat</span><div class="kb-keys"><span class="kb-key">?</span></div></div>
+      <div class="kb-row"><span class="kb-desc">İptal / Kapat</span><div class="kb-keys"><span class="kb-key">Esc</span></div></div>
+    </div>
+    <div class="kb-group">
+      <div class="kb-group-label">Canvas</div>
+      <div class="kb-row"><span class="kb-desc">Yaklaştır</span><div class="kb-keys"><span class="kb-key">Ctrl</span><span class="kb-key">+</span></div></div>
+      <div class="kb-row"><span class="kb-desc">Uzaklaştır</span><div class="kb-keys"><span class="kb-key">Ctrl</span><span class="kb-key">−</span></div></div>
+      <div class="kb-row"><span class="kb-desc">Sıfırla / Fit</span><div class="kb-keys"><span class="kb-key">Ctrl</span><span class="kb-key">0</span></div></div>
+      <div class="kb-row"><span class="kb-desc">Kaydır</span><div class="kb-keys"><span class="kb-key">Sürükle</span></div></div>
+      <div class="kb-row"><span class="kb-desc">Zoom (fare tekerleği)</span><div class="kb-keys"><span class="kb-key">Scroll</span></div></div>
+    </div>
+    <div class="kb-group" style="margin-bottom:0">
+      <div class="kb-group-label">Parça Formu</div>
+      <div class="kb-row"><span class="kb-desc">Parça ekle</span><div class="kb-keys"><span class="kb-key">Enter</span></div></div>
+      <div class="kb-row"><span class="kb-desc">Düzenle: Kaydet</span><div class="kb-keys"><span class="kb-key">Enter</span></div></div>
+      <div class="kb-row"><span class="kb-desc">Düzenle: İptal</span><div class="kb-keys"><span class="kb-key">Esc</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOM CONFIRM MODAL -->
+<div class="onboard-overlay" id="confirmModal" style="z-index:500">
+  <div class="onboard-modal" style="max-width:340px;padding:22px 24px">
+    <div style="font-size:1.3rem;text-align:center;margin-bottom:10px">⚠️</div>
+    <div class="onboard-title" style="font-size:1rem;margin-bottom:8px" id="confirmMsg">Emin misiniz?</div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button onclick="_confirmResolve(false)" style="flex:1;padding:11px;border-radius:8px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-family:var(--sans);font-size:.82rem;font-weight:700;cursor:pointer">İptal</button>
+      <button id="confirmOkBtn" onclick="_confirmResolve(true)" style="flex:1;padding:11px;border-radius:8px;border:none;background:var(--red);color:#fff;font-family:var(--sans);font-size:.82rem;font-weight:700;cursor:pointer">Evet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div class="onboard-overlay" id="onboardOverlay">
+  <div class="onboard-modal">
+    <!-- Header -->
+    <div class="onboard-header">
+      <div class="onboard-logo">📐</div>
+      <div class="onboard-title">Panel <span>Optimizasyonu</span></div>
+      <div class="onboard-sub">Birkaç adımda ilk yerleşim planınızı oluşturun.</div>
+      <div class="onboard-dots">
+        <div class="onboard-dot active" id="ob-dot-0"></div>
+        <div class="onboard-dot" id="ob-dot-1"></div>
+        <div class="onboard-dot" id="ob-dot-2"></div>
+      </div>
+    </div>
+    <!-- Steps -->
+    <div class="onboard-steps-wrap">
+      <div class="onboard-step-page active" id="ob-page-0">
+        <div class="onboard-step-card">
+          <div class="onboard-step-icon">🪵</div>
+          <div class="onboard-step-body">
+            <strong data-ob="obStep1Title">Ana Paneli Ayarlayın</strong>
+            <p><span data-ob="obStep1Body">Keseceğiniz levhanın genişlik ve yüksekliğini girin. Standart boyutlar için hazır presetleri kullanabilirsiniz.</span></p>
+          </div>
+        </div>
+        <div class="onboard-step-tip" data-ob="obStep1Tip">💡 MDF 2440×1220, Kontraplak 2500×1250 gibi presetler sol üst köşede hazır.</div>
+      </div>
+      <div class="onboard-step-page" id="ob-page-1">
+        <div class="onboard-step-card">
+          <div class="onboard-step-icon">➕</div>
+          <div class="onboard-step-body">
+            <strong data-ob="obStep2Title">Parçaları Ekleyin</strong>
+            <p><span data-ob="obStep2Body">Her parçanın adını, genişlik/yükseklik (mm) ve adetini girin. Farklı parça türleri için farklı renkler atayabilirsiniz.</span></p>
+          </div>
+        </div>
+        <div class="onboard-step-tip" data-ob="obStep2Tip">💡 CSV veya JSON dosyası sürükleyerek toplu parça aktarımı yapabilirsiniz.</div>
+      </div>
+      <div class="onboard-step-page" id="ob-page-2">
+        <div class="onboard-step-card">
+          <div class="onboard-step-icon">▶</div>
+          <div class="onboard-step-body">
+            <strong data-ob="obStep3Title">Hesapla ve İndir</strong>
+            <p><span data-ob="obStep3Body">«Hesapla & Yerleştir» butonuna basın. Sonucu PNG, PDF, SVG veya Excel olarak dışa aktarın.</span></p>
+          </div>
+        </div>
+        <div class="onboard-step-tip" data-ob="obStep3Tip">💡 Ctrl+Enter ile hızlı hesaplama, Ctrl+Z ile geri alma yapabilirsiniz.</div>
+      </div>
+    </div>
+    <!-- Footer -->
+    <div class="onboard-footer">
+      <span class="onboard-footer-left" id="ob-skip">Bir daha gösterme</span>
+      <div class="onboard-footer-right">
+        <button class="onboard-btn-back" id="ob-back" style="display:none" onclick="obStep(-1)">← Geri</button>
+        <button class="onboard-btn-next" id="ob-next" onclick="obStep(1)">İleri →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UNDO BAR -->
+<div class="undo-bar" id="undoBar">
+  <span id="undoMsg">Son işlem geri alındı</span>
+  <button class="undo-btn" onclick="undoLast()"><span data-i18n="undo">↩ Geri Al</span></button>
+  <button style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:12px" onclick="hideUndo()">✕</button>
+</div>
+
+
+
+<div class="kb-toast" id="kbToast">⌨ Klavye kısayolları için <strong>?</strong> tuşuna basın</div>
+<button type="button" class="phase1-sticky-mobile phase1-basic-only" onclick="phase1SmartCalculate()">Akıllı Optimize</button>
+
+<script src="js/early-globals.js"></script>
+<script src="js/phase1-mode.js"></script>
+<script src="js/app-core.js"></script>
+<script src="js/lazy-loader.js"></script>
+<script>
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('service-worker.js').catch(function(e){console.warn('SW kayıt hatası:', e);});
+  });
+}
+</script>
+</body>
+</html>
